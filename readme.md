@@ -1,0 +1,1 @@
+docker run --name my-postgres -e POSTGRES_USER=user -e POSTGRES_PASSWORD= -e POSTGRES_DB=pvg -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 -d postgres:latest
