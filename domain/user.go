@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 )
 
@@ -16,4 +17,13 @@ type Users struct {
 	Status    string    `json:"status"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+// UserRepository Represent the User's repository contract
+type UserRepository interface {
+	Fetch(ctx context.Context) ([]Users, error)
+}
+
+type UserService interface {
+	GetAllUser(ctx context.Context) ([]Users, error)
 }

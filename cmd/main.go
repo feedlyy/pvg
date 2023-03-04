@@ -7,7 +7,11 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"pvg/controller"
 	"pvg/domain"
+	"pvg/repository"
+	"pvg/service"
+	"time"
 )
 
 func init() {
@@ -45,7 +49,13 @@ func main() {
 		panic(err)
 	}
 
+	timeoutCtx := viper.GetInt(`context.timeout`)
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+	userController := controller.NewUserController(userService, time.Duration(timeoutCtx)*time.Second)
+
 	serverAddr := viper.GetString(`server.address`)
 	r := gin.Default()
+	r.GET("/users", userController.GetUsers)
 	r.Run(serverAddr)
 }
