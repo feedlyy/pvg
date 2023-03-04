@@ -22,8 +22,10 @@ type Users struct {
 // UserRepository Represent the User's repository contract
 type UserRepository interface {
 	Fetch(ctx context.Context) ([]Users, error)
+	GetByUsername(ctx context.Context, username string) (Users, error)
 }
 
 type UserService interface {
 	GetAllUser(ctx context.Context) ([]Users, error)
+	GetUser(ctx context.Context, username string) (Users, error)
 }

@@ -18,3 +18,7 @@ func NewUserService(usrRepo domain.UserRepository) domain.UserService {
 func (u *userService) GetAllUser(ctx context.Context) ([]domain.Users, error) {
 	return u.userRepo.Fetch(ctx)
 }
+
+func (u *userService) GetUser(ctx context.Context, username string) (domain.Users, error) {
+	return u.userRepo.GetByUsername(ctx, username)
+}
