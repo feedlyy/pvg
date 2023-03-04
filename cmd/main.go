@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"net/http"
+	"pvg/domain"
 )
 
 func init() {
@@ -35,17 +35,17 @@ func main() {
 	dbPort := viper.GetString(`database.port`)
 	dsn := fmt.Sprintf("host=%s user=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
 		dbHost, dbUser, dbName, dbPort)
-	_, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&domain.Users{})
 	if err != nil {
 		panic(err)
 	}
 
 	serverAddr := viper.GetString(`server.address`)
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
 	r.Run(serverAddr)
 }
