@@ -71,7 +71,7 @@ func (u *UserController) GetUser(c *gin.Context) {
 		resp.Status = "Failed"
 		resp.Message = err.Error()
 		switch {
-		case err.Error() == "record not found":
+		case err.Error() == helper.RecordNotFound:
 			c.AbortWithStatusJSON(http.StatusNotFound, resp)
 			return
 		default:
