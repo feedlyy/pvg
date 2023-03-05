@@ -104,7 +104,6 @@ func (u *UserController) Create(c *gin.Context) {
 			CreatedAt: time.Now(),
 		}
 	)
-	//c.Header("Content-Type", "application/x-www-form-urlencoded")
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
 	defer cancel()
@@ -117,7 +116,6 @@ func (u *UserController) Create(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
 		return
 	}
-	fmt.Println("birthday nya:", birthday)
 
 	err = c.ShouldBind(&usr)
 	if err != nil {
@@ -127,11 +125,6 @@ func (u *UserController) Create(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
 		return
 	}
-
-	//loc, _ := time.LoadLocation("Local")
-	//birthday, err = time.ParseInLocation(helper.BirthdayLayout, c.PostForm("birthday"), loc)
-	//fmt.Println("birthday nya:", birthday)
-	//birthday, err = time.Parse(helper.BirthdayLayout, c.PostForm("birthday"))
 
 	phone, err = strconv.Atoi(c.PostForm("phone"))
 	if err != nil {
@@ -158,6 +151,83 @@ func (u *UserController) Create(c *gin.Context) {
 		resp.Message = err.Error()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
 		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+func (u *UserController) Update(c *gin.Context) {
+	var (
+		err  error
+		resp = helper.Response{
+			Status: "Success",
+		}
+		pwd      = ""
+		phone    = 0
+		id       = c.Param("id")
+		birthday = time.Time{}
+		usr      = domain.Users{
+			Firstname: c.PostForm("firstname"),
+			Lastname:  c.PostForm("lastname"),
+		}
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
+	defer cancel()
+
+	usrID, err := strconv.Atoi(id)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+		return
+	}
+	usr.ID = uint(usrID)
+
+	switch {
+	case c.PostForm("birthday") != "":
+		loc, _ := time.LoadLocation("Local")
+		birthday, err = time.ParseInLocation(helper.BirthdayLayout, c.PostForm("birthday"), loc)
+		if err != nil {
+			resp.Status = "Failed"
+			resp.Message = err.Error()
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+		usr.Birthday = birthday
+	case c.PostForm("phone") != "":
+		phone, err = strconv.Atoi(c.PostForm("phone"))
+		if err != nil {
+			resp.Status = "Failed"
+			resp.Message = err.Error()
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+		usr.Phone = uint(phone)
+	case c.PostForm("password") != "":
+		pwd, err = helper.HashPassword(c.PostForm("password"))
+		if err != nil {
+			resp.Status = "Failed"
+			resp.Message = err.Error()
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+		usr.Password = pwd
+	default:
+	}
+
+	err = u.UserServ.UpdateUser(ctx, usr)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		switch {
+		case err.Error() == helper.RecordNotFound:
+			c.AbortWithStatusJSON(http.StatusNotFound, resp)
+			return
+		default:
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, resp)

@@ -23,12 +23,15 @@ type Users struct {
 type UserRepository interface {
 	Fetch(ctx context.Context) ([]Users, error)
 	GetByUsername(ctx context.Context, username string) (Users, error)
-	Insert(ctx context.Context, usr Users) error
 	GetByUsrPhoneEmail(ctx context.Context, user Users) (Users, error)
+	GetById(ctx context.Context, id int) (Users, error)
+	Insert(ctx context.Context, usr Users) error
+	Update(ctx context.Context, usr Users) error
 }
 
 type UserService interface {
 	GetAllUser(ctx context.Context) ([]Users, error)
 	GetUser(ctx context.Context, username string) (Users, error)
 	CreateUser(ctx context.Context, usr Users) error
+	UpdateUser(ctx context.Context, usr Users) error
 }

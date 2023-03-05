@@ -46,3 +46,14 @@ func (u *userService) CreateUser(ctx context.Context, usr domain.Users) error {
 
 	return u.userRepo.Insert(ctx, usr)
 }
+
+func (u *userService) UpdateUser(ctx context.Context, usr domain.Users) error {
+	var err error
+
+	_, err = u.userRepo.GetById(ctx, int(usr.ID))
+	if err != nil {
+		return err
+	}
+
+	return u.userRepo.Update(ctx, usr)
+}

@@ -73,3 +73,35 @@ func (u *userRepository) Insert(ctx context.Context, usr domain.Users) error {
 
 	return nil
 }
+
+func (u *userRepository) Update(ctx context.Context, usr domain.Users) error {
+	var err error
+
+	if err = u.db.WithContext(ctx).Model(&usr).Updates(domain.Users{
+		Password:  usr.Password,
+		Firstname: usr.Firstname,
+		Lastname:  usr.Lastname,
+		Phone:     usr.Phone,
+		Birthday:  usr.Birthday,
+	}).Error; err != nil {
+		logrus.Errorf("User - Repository|err when update user, err:%v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (u *userRepository) GetById(ctx context.Context, id int) (domain.Users, error) {
+	var (
+		res domain.Users
+		err error
+	)
+
+	err = u.db.WithContext(ctx).First(&res, "id = ?", id).Error
+	if err != nil {
+		logrus.Errorf("User - Repository|err when get user by id, err:%v", err)
+		return domain.Users{}, err
+	}
+
+	return res, nil
+}
