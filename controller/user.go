@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"pvg/domain"
@@ -119,7 +118,6 @@ func (u *UserController) Create(c *gin.Context) {
 
 	err = c.ShouldBind(&usr)
 	if err != nil {
-		fmt.Println("err nya dari sini", err.Error())
 		resp.Status = "Failed"
 		resp.Message = err.Error()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
