@@ -57,3 +57,14 @@ func (u *userService) UpdateUser(ctx context.Context, usr domain.Users) error {
 
 	return u.userRepo.Update(ctx, usr)
 }
+
+func (u *userService) DeleteUser(ctx context.Context, id int) error {
+	var err error
+
+	_, err = u.userRepo.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return u.userRepo.Delete(ctx, id)
+}

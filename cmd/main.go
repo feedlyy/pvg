@@ -60,5 +60,6 @@ func main() {
 	r.GET("/user", userController.GetUserByUsername)
 	r.POST("/user/register", userController.Create)
 	r.PATCH("/user/:id", userController.Update)
+	r.DELETE("/user/:id", userController.DeleteUser)
 	r.Run(serverAddr)
 }

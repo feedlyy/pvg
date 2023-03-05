@@ -230,3 +230,40 @@ func (u *UserController) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+func (u *UserController) DeleteUser(c *gin.Context) {
+	var (
+		err  error
+		resp = helper.Response{
+			Status: "Success",
+		}
+		id = c.Param("id")
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
+	defer cancel()
+
+	usrID, err := strconv.Atoi(id)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	err = u.UserServ.DeleteUser(ctx, usrID)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		switch {
+		case err.Error() == helper.RecordNotFound:
+			c.AbortWithStatusJSON(http.StatusNotFound, resp)
+			return
+		default:
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, resp)
+}

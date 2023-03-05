@@ -27,6 +27,7 @@ type UserRepository interface {
 	GetById(ctx context.Context, id int) (Users, error)
 	Insert(ctx context.Context, usr Users) error
 	Update(ctx context.Context, usr Users) error
+	Delete(ctx context.Context, id int) error
 }
 
 type UserService interface {
@@ -34,4 +35,5 @@ type UserService interface {
 	GetUser(ctx context.Context, username string) (Users, error)
 	CreateUser(ctx context.Context, usr Users) error
 	UpdateUser(ctx context.Context, usr Users) error
+	DeleteUser(ctx context.Context, id int) error
 }

@@ -105,3 +105,15 @@ func (u *userRepository) GetById(ctx context.Context, id int) (domain.Users, err
 
 	return res, nil
 }
+
+func (u *userRepository) Delete(ctx context.Context, id int) error {
+	var err error
+
+	err = u.db.WithContext(ctx).Delete(domain.Users{}, id).Error
+	if err != nil {
+		logrus.Errorf("User - Repository|err when delete user, err:%v", err)
+		return err
+	}
+
+	return nil
+}
