@@ -25,7 +25,7 @@ type UserRepository interface {
 	GetByUsername(ctx context.Context, username string) (Users, error)
 	GetByUsrPhoneEmail(ctx context.Context, user Users) (Users, error)
 	GetById(ctx context.Context, id int) (Users, error)
-	Insert(ctx context.Context, usr Users) error
+	Insert(ctx context.Context, usr Users) (int, error)
 	Update(ctx context.Context, usr Users) error
 	Delete(ctx context.Context, id int) error
 }

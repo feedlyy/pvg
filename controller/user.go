@@ -89,7 +89,8 @@ func (u *UserController) Create(c *gin.Context) {
 	var (
 		err  error
 		resp = helper.Response{
-			Status: "Success",
+			Status:  "Success",
+			Message: "Please check your email for the activation codes",
 		}
 		pwd      = ""
 		phone    = 0

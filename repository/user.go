@@ -63,15 +63,15 @@ func (u *userRepository) GetByUsrPhoneEmail(ctx context.Context, user domain.Use
 	return res, nil
 }
 
-func (u *userRepository) Insert(ctx context.Context, usr domain.Users) error {
+func (u *userRepository) Insert(ctx context.Context, usr domain.Users) (int, error) {
 	var err error
 
 	if err = u.db.WithContext(ctx).Create(&usr).Error; err != nil {
 		logrus.Errorf("User - Repository|err when store user, err:%v", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return int(usr.ID), nil
 }
 
 func (u *userRepository) Update(ctx context.Context, usr domain.Users) error {

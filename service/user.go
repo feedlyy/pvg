@@ -10,11 +10,13 @@ import (
 
 type userService struct {
 	userRepo domain.UserRepository
+	kafka    domain.KafkaProducer
 }
 
-func NewUserService(usrRepo domain.UserRepository) domain.UserService {
+func NewUserService(usrRepo domain.UserRepository, k domain.KafkaProducer) domain.UserService {
 	return &userService{
 		userRepo: usrRepo,
+		kafka:    k,
 	}
 }
 
@@ -28,8 +30,9 @@ func (u *userService) GetUser(ctx context.Context, username string) (domain.User
 
 func (u *userService) CreateUser(ctx context.Context, usr domain.Users) error {
 	var (
-		err    error
-		dataDb domain.Users
+		err        error
+		dataDb     domain.Users
+		insertedId int
 	)
 
 	// check whether inserted user alr have same credentials like phone, username, email
@@ -44,7 +47,18 @@ func (u *userService) CreateUser(ctx context.Context, usr domain.Users) error {
 		return err
 	}
 
-	return u.userRepo.Insert(ctx, usr)
+	insertedId, err = u.userRepo.Insert(ctx, usr)
+	if err != nil {
+		return err
+	}
+
+	err = u.kafka.SendMessage(helper.EmailTopic, insertedId)
+	if err != nil {
+		logrus.Errorf("User - Service|err send email user with kafka, err:%v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (u *userService) UpdateUser(ctx context.Context, usr domain.Users) error {

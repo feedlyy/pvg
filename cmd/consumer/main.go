@@ -3,22 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/Shopify/sarama"
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 	"pvg/config"
-	"pvg/controller"
 	"pvg/domain"
 	"pvg/domain/consumer"
-	"pvg/repository"
-	"pvg/service"
-	"time"
+	"pvg/helper"
+	repoConsumer "pvg/repository/consumer"
+	servConsumer "pvg/service/consumer"
 )
 
 func init() {
-	viper.SetConfigFile(`../config/config.json`)
+	viper.SetConfigFile(`../../config/config.json`)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
@@ -58,35 +57,24 @@ func main() {
 	kafkaRetry := viper.GetInt(`kafka.retry`)
 	kafkaTimeout := viper.GetInt(`kafka.timeout`)
 	kafkaConfig := config.GetKafkaConfig(kafkaUsr, kafkaPwd, kafkaTimeout, kafkaRetry)
-	producers, err := sarama.NewSyncProducer([]string{kafkaAddr}, kafkaConfig)
+	consumers, err := sarama.NewConsumer([]string{kafkaAddr}, kafkaConfig)
 	if err != nil {
-		logrus.Errorf("Unable to create kafka producer got error %v", err)
-		return
+		logrus.Errorf("Error create kakfa consumer got error %v", err)
 	}
 	defer func() {
-		if err = producers.Close(); err != nil {
-			logrus.Errorf("Unable to stop kafka producer: %v", err)
+		if err := consumers.Close(); err != nil {
+			logrus.Fatal(err)
 			return
 		}
 	}()
 
-	logrus.Infof("Success create kafka sync-producer")
-
-	kafka := &domain.KafkaProducer{
-		Producer: producers,
+	kafkaConsumer := &consumer.KafkaConsumer{
+		Consumer: consumers,
 	}
 
-	timeoutCtx := viper.GetInt(`context.timeout`)
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo, *kafka)
-	userController := controller.NewUserController(userService, time.Duration(timeoutCtx)*time.Second)
+	subACRepo := repoConsumer.NewACRepository(db)
+	subACService := servConsumer.NewACService(*kafkaConsumer, subACRepo)
 
-	serverAddr := viper.GetString(`server.address`)
-	r := gin.Default()
-	r.GET("/users", userController.GetUsers)
-	r.GET("/user", userController.GetUserByUsername)
-	r.POST("/user/register", userController.Create)
-	r.PATCH("/user/:id", userController.Update)
-	r.DELETE("/user/:id", userController.DeleteUser)
-	r.Run(serverAddr)
+	signals := make(chan os.Signal, 1)
+	subACService.Process([]string{helper.EmailTopic}, signals)
 }
