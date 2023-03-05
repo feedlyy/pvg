@@ -46,3 +46,30 @@ func (u *userRepository) GetByUsername(ctx context.Context, username string) (do
 
 	return res, nil
 }
+
+func (u *userRepository) GetByUsrPhoneEmail(ctx context.Context, user domain.Users) (domain.Users, error) {
+	var (
+		res domain.Users
+		err error
+	)
+
+	err = u.db.WithContext(ctx).Raw("SELECT username, email, phone FROM users WHERE username = ? OR "+
+		"email = ? OR phone = ?", user.Username, user.Email, user.Phone).Scan(&res).Error
+	if err != nil {
+		logrus.Errorf("User - Repository|err when get user by username, phone, or email, err:%v", err)
+		return domain.Users{}, err
+	}
+
+	return res, nil
+}
+
+func (u *userRepository) Insert(ctx context.Context, usr domain.Users) error {
+	var err error
+
+	if err = u.db.WithContext(ctx).Create(&usr).Error; err != nil {
+		logrus.Errorf("User - Repository|err when store user, err:%v", err)
+		return err
+	}
+
+	return nil
+}

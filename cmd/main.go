@@ -57,6 +57,7 @@ func main() {
 	serverAddr := viper.GetString(`server.address`)
 	r := gin.Default()
 	r.GET("/users", userController.GetUsers)
-	r.GET("/user", userController.GetUser)
+	r.GET("/user", userController.GetUserByUsername)
+	r.POST("/user/register", userController.Create)
 	r.Run(serverAddr)
 }
