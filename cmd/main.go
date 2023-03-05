@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/Shopify/sarama"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"pvg/config"
 	"pvg/controller"
 	"pvg/domain"
 	"pvg/repository"
@@ -47,6 +49,30 @@ func main() {
 	err = db.AutoMigrate(&domain.Users{})
 	if err != nil {
 		panic(err)
+	}
+
+	kafkaUsr := viper.GetString(`kafka.username`)
+	kafkaPwd := viper.GetString(`kafka.password`)
+	kafkaAddr := viper.GetString(`kafka.address`)
+	kafkaRetry := viper.GetInt(`kafka.retry`)
+	kafkaTimeout := viper.GetInt(`kafka.timeout`)
+	kafkaConfig := config.GetKafkaConfig(kafkaUsr, kafkaPwd, kafkaTimeout, kafkaRetry)
+	producers, err := sarama.NewSyncProducer([]string{kafkaAddr}, kafkaConfig)
+	if err != nil {
+		logrus.Errorf("Unable to create kafka producer got error %v", err)
+		return
+	}
+	defer func() {
+		if err := producers.Close(); err != nil {
+			logrus.Errorf("Unable to stop kafka producer: %v", err)
+			return
+		}
+	}()
+
+	logrus.Infof("Success create kafka sync-producer")
+
+	kafka := &domain.KafkaProducer{
+		Producer: producers,
 	}
 
 	timeoutCtx := viper.GetInt(`context.timeout`)

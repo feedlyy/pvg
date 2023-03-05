@@ -11,5 +11,12 @@
     "port": "5432",
     "user": "user",
     "name": "pvg"
+  },
+  "kafka": {
+    "address": "kafka:9092",
+    "retry": 3,
+    "timeout": 5,
+    "username": "",
+    "password": "",
   }
 }
