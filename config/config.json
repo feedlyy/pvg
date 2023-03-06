@@ -18,5 +18,9 @@
     "timeout": 5,
     "username": "",
     "password": ""
+  },
+  "mailjet": {
+    "api_key": "6cfb1854f9a952c94c850093008af627",
+    "secret_key": "09398097102f192b3853e4c391f8f377"
   }
 }

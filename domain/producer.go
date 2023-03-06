@@ -12,14 +12,14 @@ type KafkaProducer struct {
 }
 
 // SendMessage function to send message into kafka
-func (p *KafkaProducer) SendMessage(topic string, id int) error {
+func (p *KafkaProducer) SendMessage(topic string, usr Users) error {
 	var (
 		kafkaMsgs     *sarama.ProducerMessage
 		err           error
 		serializedMsg []byte
 	)
 
-	serializedMsg, err = json.Marshal(id)
+	serializedMsg, err = json.Marshal(usr)
 	if err != nil {
 		logrus.Errorf("marhshal-ing err when send message kafka: %v", err)
 		return err

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Shopify/sarama"
+	"github.com/mailjet/mailjet-apiv3-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
@@ -72,8 +73,14 @@ func main() {
 		Consumer: consumers,
 	}
 
+	// Initialize Mailjet client
+	mailJetApi := viper.GetString(`mailjet.api_key`)
+	mailJetSecret := viper.GetString(`mailjet.secret_key`)
+	mj := mailjet.NewMailjetClient(mailJetApi, mailJetSecret)
+
+	//apiKey := viper.GetString(`sendgrid.apikey`)
 	subACRepo := repoConsumer.NewACRepository(db)
-	subACService := servConsumer.NewACService(*kafkaConsumer, subACRepo)
+	subACService := servConsumer.NewACService(*kafkaConsumer, subACRepo, mj)
 
 	signals := make(chan os.Signal, 1)
 	subACService.Process([]string{helper.EmailTopic}, signals)

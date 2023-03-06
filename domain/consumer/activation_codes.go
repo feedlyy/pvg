@@ -10,7 +10,7 @@ import (
 type ActivationCodes struct {
 	ID        uint `gorm:"primarykey"`
 	UserID    uint
-	User      domain.Users `gorm:"references:ID"`
+	User      domain.Users `gorm:"constraint:OnDelete:CASCADE"`
 	Code      uint
 	CreatedAt time.Time `gorm:"type:timestamp"`
 	UpdatedAt time.Time `gorm:"type:timestamp"`

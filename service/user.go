@@ -51,8 +51,9 @@ func (u *userService) CreateUser(ctx context.Context, usr domain.Users) error {
 	if err != nil {
 		return err
 	}
+	usr.ID = uint(insertedId)
 
-	err = u.kafka.SendMessage(helper.EmailTopic, insertedId)
+	err = u.kafka.SendMessage(helper.EmailTopic, usr)
 	if err != nil {
 		logrus.Errorf("User - Service|err send email user with kafka, err:%v", err)
 		return err

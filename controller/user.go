@@ -148,8 +148,14 @@ func (u *UserController) Create(c *gin.Context) {
 	if err != nil {
 		resp.Status = "Failed"
 		resp.Message = err.Error()
-		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
-		return
+		switch {
+		case err.Error() == helper.DataExists:
+			c.AbortWithStatusJSON(http.StatusBadRequest, resp)
+			return
+		default:
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, resp)
