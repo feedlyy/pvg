@@ -78,7 +78,8 @@ func main() {
 
 	timeoutCtx := viper.GetInt(`context.timeout`)
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo, *kafka)
+	acRepository := repository.NewACRepository(db)
+	userService := service.NewUserService(userRepo, *kafka, acRepository)
 	userController := controller.NewUserController(userService, time.Duration(timeoutCtx)*time.Second)
 
 	serverAddr := viper.GetString(`server.address`)
@@ -88,5 +89,6 @@ func main() {
 	r.POST("/user/register", userController.Create)
 	r.PATCH("/user/:id", userController.Update)
 	r.DELETE("/user/:id", userController.DeleteUser)
+	r.PATCH("/user/activate", userController.ActivateUser)
 	r.Run(serverAddr)
 }

@@ -34,11 +34,16 @@ func (a *acService) Process(topics []string, signals chan os.Signal) {
 		err            error
 		partitionList  []int32
 		ac             = consumer.ActivationCodes{}
-		expiredAt      = time.Now()
+		expiredAt      time.Time
 		ctx            = context.Background()
 		activationCode = helper.GenerateActivationCodes()
 		usr            = domain.Users{}
+		loc            *time.Location
 	)
+	loc, err = time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		logrus.Errorf("Sub-Service|Err when get location %v", err)
+	}
 
 	for _, topic := range topics {
 		partitionList, err = a.kafka.Consumer.Partitions(topic)
@@ -65,6 +70,7 @@ ConsumerLoop:
 			// insert into activation code table
 			ac.UserID = usr.ID
 			ac.Code = uint(activationCode)
+			expiredAt = time.Now().In(loc)
 			ac.ExpiresAt = expiredAt.Add(time.Hour)
 			err = a.repo.Insert(ctx, ac)
 			if err != nil {

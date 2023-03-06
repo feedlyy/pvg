@@ -274,3 +274,57 @@ func (u *UserController) DeleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+func (u *UserController) ActivateUser(c *gin.Context) {
+	var (
+		err  error
+		resp = helper.Response{
+			Status: "Success",
+		}
+		usrname        = c.Query("username")
+		code           int
+		activationCode = domain.ActivationCodes{}
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
+	defer cancel()
+
+	code, err = strconv.Atoi(c.PostForm("code"))
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+		return
+	}
+	activationCode.Code = uint(code)
+
+	err = c.ShouldBind(&code)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	err = u.UserServ.ActivateUser(ctx, usrname, code)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		switch {
+		case err.Error() == helper.RecordNotFound:
+			c.AbortWithStatusJSON(http.StatusNotFound, resp)
+			return
+		case err.Error() == helper.NoValidCode || err.Error() == helper.DataActive:
+			c.AbortWithStatusJSON(http.StatusBadRequest, resp)
+			return
+		case err.Error() == helper.NoValid:
+			c.AbortWithStatusJSON(http.StatusGone, resp)
+			return
+		default:
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, resp)
+}

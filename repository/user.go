@@ -83,6 +83,7 @@ func (u *userRepository) Update(ctx context.Context, usr domain.Users) error {
 		Lastname:  usr.Lastname,
 		Phone:     usr.Phone,
 		Birthday:  usr.Birthday,
+		Status:    usr.Status,
 	}).Error; err != nil {
 		logrus.Errorf("User - Repository|err when update user, err:%v", err)
 		return err

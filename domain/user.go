@@ -36,4 +36,5 @@ type UserService interface {
 	CreateUser(ctx context.Context, usr Users) error
 	UpdateUser(ctx context.Context, usr Users) error
 	DeleteUser(ctx context.Context, id int) error
+	ActivateUser(ctx context.Context, username string, code int) error
 }
