@@ -290,14 +290,16 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
 	defer cancel()
 
-	code, err = strconv.Atoi(c.PostForm("code"))
-	if err != nil {
-		resp.Status = "Failed"
-		resp.Message = err.Error()
-		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
-		return
+	if c.PostForm("code") != "" {
+		code, err = strconv.Atoi(c.PostForm("code"))
+		if err != nil {
+			resp.Status = "Failed"
+			resp.Message = err.Error()
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+		activationCode.Code = uint(code)
 	}
-	activationCode.Code = uint(code)
 
 	err = c.ShouldBind(&code)
 	if err != nil {
