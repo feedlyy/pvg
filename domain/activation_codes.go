@@ -16,4 +16,5 @@ type ActivationCodes struct {
 
 type ActivationCodeRepository interface {
 	GetByUserId(ctx context.Context, id int) (ActivationCodes, error)
+	Insert(ctx context.Context, ac ActivationCodes) error
 }

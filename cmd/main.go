@@ -90,5 +90,6 @@ func main() {
 	r.PATCH("/user/:id", userController.Update)
 	r.DELETE("/user/:id", userController.DeleteUser)
 	r.PATCH("/user/activate", userController.ActivateUser)
+	r.POST("/user/code", userController.RequestCodeActivation)
 	r.Run(serverAddr)
 }

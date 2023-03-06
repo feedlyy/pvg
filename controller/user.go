@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"pvg/domain"
@@ -326,5 +327,44 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 		}
 	}
 
+	c.JSON(http.StatusOK, resp)
+}
+
+func (u *UserController) RequestCodeActivation(c *gin.Context) {
+	var (
+		err  error
+		resp = helper.Response{
+			Status: "Success",
+		}
+		usrname        = c.Query("username")
+		activationCode = domain.ActivationCodes{}
+	)
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), u.Timeout)
+	defer cancel()
+
+	activationCode, err = u.UserServ.RequestActivationCode(ctx, usrname)
+	if err != nil {
+		resp.Status = "Failed"
+		resp.Message = err.Error()
+		switch {
+		case err.Error() == helper.RecordNotFound:
+			c.AbortWithStatusJSON(http.StatusNotFound, resp)
+			return
+		case err.Error() == helper.DataActive:
+			c.AbortWithStatusJSON(http.StatusBadRequest, resp)
+			return
+		case err.Error() == helper.StillValid:
+			resp.Message += fmt.Sprintf(", your code (%v) still active until %v",
+				activationCode.Code, activationCode.ExpiresAt.Format("2006-01-02 15:04:05"))
+			c.AbortWithStatusJSON(http.StatusBadRequest, resp)
+			return
+		default:
+			c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
+			return
+		}
+	}
+
+	resp.Message = fmt.Sprintf("This is your activation code: %v", activationCode.Code)
 	c.JSON(http.StatusOK, resp)
 }

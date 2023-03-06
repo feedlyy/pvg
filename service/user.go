@@ -135,3 +135,60 @@ func (u *userService) ActivateUser(ctx context.Context, username string, code in
 
 	return nil
 }
+
+func (u *userService) RequestActivationCode(ctx context.Context, username string) (domain.ActivationCodes, error) {
+	var (
+		err            error
+		ac             domain.ActivationCodes
+		user           domain.Users
+		now            = time.Now()
+		diff           time.Duration
+		activationCode = helper.GenerateActivationCodes()
+		loc            *time.Location
+		expiredAt      time.Time
+	)
+	loc, err = time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		logrus.Errorf("User - Service|Err when get location %v", err)
+		return domain.ActivationCodes{}, err
+	}
+	expiredAt = time.Now().In(loc)
+
+	// get detail user
+	user, err = u.userRepo.GetByUsername(ctx, username)
+	if err != nil {
+		return domain.ActivationCodes{}, err
+	}
+
+	// get activation codes data
+	ac, err = u.acRepo.GetByUserId(ctx, int(user.ID))
+	if err != nil {
+		return domain.ActivationCodes{}, err
+	}
+	diff = now.Sub(ac.ExpiresAt)
+
+	switch {
+	case user.Status == helper.Active:
+		err = errors.New(helper.DataActive)
+		logrus.Errorf("User - Service|err when validate user activation codes, err:%v", err)
+		return domain.ActivationCodes{}, err
+	case int(diff.Hours())+7 < 2: // +7 for convert utc to gmt
+		err = errors.New(helper.StillValid)
+		logrus.Errorf("User - Service|err when validate user activation codes, err:%v", err)
+		return ac, err
+	default:
+	}
+
+	ac = domain.ActivationCodes{} // assign nil
+	ac = domain.ActivationCodes{
+		UserID:    user.ID,
+		Code:      uint(activationCode),
+		ExpiresAt: expiredAt.Add(time.Hour),
+	}
+	err = u.acRepo.Insert(ctx, ac)
+	if err != nil {
+		return domain.ActivationCodes{}, err
+	}
+
+	return ac, nil
+}

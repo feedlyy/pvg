@@ -37,4 +37,5 @@ type UserService interface {
 	UpdateUser(ctx context.Context, usr Users) error
 	DeleteUser(ctx context.Context, id int) error
 	ActivateUser(ctx context.Context, username string, code int) error
+	RequestActivationCode(ctx context.Context, username string) (ActivationCodes, error)
 }

@@ -10,4 +10,5 @@ const (
 	Active         = "active"
 	NoValidCode    = "your activation code is invalid, please check again"
 	NoValid        = "your request is no longer valid, please request another code activation"
+	StillValid     = "your activation code is still active"
 )
