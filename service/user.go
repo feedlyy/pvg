@@ -147,6 +147,7 @@ func (u *userService) RequestActivationCode(ctx context.Context, username string
 		loc            *time.Location
 		expiredAt      time.Time
 	)
+
 	loc, err = time.LoadLocation("Asia/Jakarta")
 	if err != nil {
 		logrus.Errorf("User - Service|Err when get location %v", err)
