@@ -86,5 +86,5 @@ the tables will auto migrate, the tables:
 ```
 
 #### List of API
-![alt text](https://github.com/feedlyy/pvg/blob/82f011e1cd6336dafd1c786b4b88f38bbe89ce66/API-List.png?raw=true)
+![API-List](https://user-images.githubusercontent.com/33906363/223329481-e9d433e0-fd93-4a88-a38f-3afa9757acfd.jpg)
 
