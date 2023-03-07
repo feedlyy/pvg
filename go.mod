@@ -3,8 +3,11 @@ module pvg
 go 1.20
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Shopify/sarama v1.38.1
 	github.com/gin-gonic/gin v1.9.0
+	github.com/golang/mock v1.4.4
+	github.com/magiconair/properties v1.8.7
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
@@ -45,7 +48,6 @@ require (
 	github.com/klauspost/compress v1.15.14 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
